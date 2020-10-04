@@ -393,7 +393,7 @@
         }
 
         coverSlider.carousel({
-            duration: Number('60'),
+            duration: Number('120'),
             fullWidth: true,
             indicators: 'true' === 'true',
             onCycleTo() {
@@ -411,7 +411,7 @@
         let autoCarousel = function () {
             carouselIntervalId = setInterval(function () {
                 coverSlider.carousel('next');
-            }, 3000);
+            }, 5000);
         };
         autoCarousel();
         
@@ -450,12 +450,12 @@
                         <div class="dream">
     
     <div class="title center-align">
-        <i class="far fa-lightbulb"></i>&nbsp;&nbsp;我的梦想
+        <i class="far fa-lightbulb"></i>&nbsp;&nbsp;让每一天都有所值
     </div>
     
     <div class="row">
         <div class="col l8 offset-l2 m10 offset-m1 s10 offset-s1 center-align text">
-            To make each day count. 让每一天都有所值
+            To make each day count.
         </div>
     </div>
 </div>
