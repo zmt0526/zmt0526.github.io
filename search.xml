@@ -4,11 +4,125 @@
   
     
     <entry>
+      <title>防抖与节流</title>
+      <link href="2019/09/09/fang-dou-jie-liu/"/>
+      <url>2019/09/09/fang-dou-jie-liu/</url>
+      
+        <content type="html"><![CDATA[<h2 id="防抖与节流"><a href="#防抖与节流" class="headerlink" title="防抖与节流"></a>防抖与节流</h2><p><strong>异同点:</strong></p><p><code>相同点:</code>都是为了降低js代码执行频率,提高代码性能和用户体验</p><p><code>不同点:</code>  </p><p>​        防抖:用户多次触发事件 <strong>只有最后一次产生效果</strong>  (不在意过程 只注重结果)</p><p>​        节流:用户多次触发事件,<strong>可能会产生多次效果,只不过触发的频率降低了</strong>( 注重过程)</p><p><strong>使用场景:</strong></p><p><code>防抖</code>: a 鼠标移入移出:用户快速移动鼠标,应该等用户结束移动后，以最后一次为主</p><p>​          b 输入框事件:验证手机号或邮箱,用户输入时不断触发键盘事件,应该等用户结束输入之后,             最后一次输入结果为准</p><p>   <code>节流:</code>a 滚动条事件onscroll </p><p>​           b 鼠标移动 onmousemove</p><p><strong>实现步骤:</strong></p><p>​    <code>防抖</code>: 在产生事件时,取消上一次的定时器,开启新的定时器</p><p>​    <code>节流:</code>在产生事件时,判断节流阀,立马将节流阀设置成不成立,然后执行所需操作,</p><p>​                    并开启新的定时器,定时器结束时重置节流阀</p><p><strong>代码实现:</strong></p><pre><code>* 防抖&lt;button&gt;点我试试&lt;/button&gt; &lt;script&gt;     let btn = document.querySelector('button')     var timeid= null     btn.onclick= function() {           if(timeid){          // 清除上一次的定时器           clearTimeout(timeid)          }        timeid=setTimeout(function(){   // 开启新的定时器         console.log('被点击了');        },1000)     } &lt;/script&gt;</code></pre><pre><code>* 节流&lt;button&gt;点我试试&lt;/button&gt; &lt;script&gt;      var btn = document.querySelector("button");      var flag = true;      btn.onclick = function () {        if (flag) {       // 先判断节流阀          flag = false;    // 关闭节流阀          setTimeout(function(){            console.log('发财了')             flag=true     // settimeout结束时开启节流阀          },1000)        }      }; &lt;/script&gt;</code></pre><p><strong>lodash库中封装好的方法:</strong></p><pre><code>* 防抖_.debounce(防抖函数,[延迟时间],[配置对象])     //返回值是防抖之后的函数  &lt;button&gt;点我试试&lt;/button&gt;  &lt;script src="lib/lodash.js"&gt;&lt;/script&gt;  &lt;script&gt;  var btn = document.querySelector('button')  btn.onclick = _.debounce(function(){    // 使用lodash中的debounce方法实现防抖    console.log('发起请求了...')  },200)  &lt;/script&gt;</code></pre><pre><code>* 节流_.throttle(要节流的函数,[需要节流的毫秒],[选项对象])&lt;button&gt;点我试试&lt;/button&gt;  &lt;script src="lib/lodash.js"&gt;&lt;/script&gt;  &lt;script&gt;  var btn = document.querySelector('button')  btn.onclick = _.throttle(function(){   // 使用lodash中的throttle方法节流    console.log('发起请求了...')  },1000)  &lt;/script&gt;</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> js </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> 防抖与节流 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>自定义组件的 v-model</title>
+      <link href="2019/09/08/v-model-miao-yong/"/>
+      <url>2019/09/08/v-model-miao-yong/</url>
+      
+        <content type="html"><![CDATA[<h2 id="自定义组件的-v-model"><a href="#自定义组件的-v-model" class="headerlink" title="自定义组件的 v-model"></a>自定义组件的 v-model</h2><p><strong>父组件传递给子组件的值, 子组件既要使用又要修改</strong></p><p><code>原来的写法:</code></p><pre><code>* 在父组件中&lt;follow-user      :is_followed="article.is_followed"    // 父组件给follow-user组件传值      @update-follow="article.is_followed = $event"  // 子组件传值要修改父组件的值&lt;/follow-user&gt;*在子组件中export default {  name: 'follow-user',  props: {        // 接收父组件的值      is_followed: {        type: Boolean,        required: true    },  methods: {      follow (){     // 传递参数要修改父组件中的数据         this.$emit('update-follow', !this.is_followed)        }          } </code></pre><p><code>简写方式:在组件上使用v-model</code></p><pre><code>* 在父组件中  // 父组件传递给子组件的值, 子组件既要使用又要修改&lt;follow-user          // 简写                    v-model="article.is_followed"   &lt;/follow-user&gt;        // 注意: 已知可以用v-bind:value和@input模拟双向数据绑定       // 此处的原理也是如此 v-model会默认使用 value和input命名      //相当于:   :value="article.is_followed"                // @input="article.is_followed = $event"*在子组件中   // 所以在子组件中需要把事件名和数据名改了export default {  name: 'follow-user',  props: {           // 接收父组件的数据名要修改      value: {        type: Boolean,        required: true    },  methods: {      follow (){     // 事件名要修改         this.$emit('input', !this.is_followed)        }          } </code></pre><p><code>进一步优化:</code>      </p><p>用v-model简化了代码   但value和input语义化指向模糊 也有数据名之间可能产生冲突</p><p>所以可以使用<code>model属性</code>来进一步优化</p><pre><code>* 在父组件中  &lt;follow-user                          v-model="article.is_followed"    // 简写   &lt;/follow-user&gt;  *在子组件中 export default {  name: 'follow-user',  model: {                   //在子组件中可以利用model属性修改    prop: 'is_followed',     // 属性名    event: 'update-follow'    //事件名  },  props: {        // 接收父组件的属性名与model属性中保持一致      is_followed: {        type: Boolean,        required: true    },  methods: {      follow (){     // 自定义事件名与model属性中保持一致         this.$emit('update-follow', !this.is_followed)        }          } </code></pre><p><code>补充:</code>一个标签只能有一个v-model  但是仍有其他数据要进行相同的处理 可以使用<code>.sync</code>语法糖   .sync详情见另一篇文章</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Vue </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Vue </tag>
+            
+            <tag> v-model </tag>
+            
+            <tag> Vue组件传值 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>vue中.sync修饰符</title>
+      <link href="2019/09/08/sync/"/>
+      <url>2019/09/08/sync/</url>
+      
+        <content type="html"><![CDATA[<h2 id="sync修饰符-语法糖"><a href="#sync修饰符-语法糖" class="headerlink" title=".sync修饰符(语法糖)"></a>.sync修饰符(语法糖)</h2><p><code>.sync是在vue中实现简单的"双向绑定"的语法糖</code></p><p>在某些场景下,我们需要对一个数据进行双向绑定,子组件接收到父组件的数据后,修改父组件的某数据,父组件根据该数据的变化而相应变化</p><p>但由于vue是单向数据流,不允许子组件直接修改父组件的数据  避免造成数据改动的来源不明等情况</p><p>所以,要实现双向绑定这个效果,就要求<code>子组件给父组件传值</code></p><pre><code>//子组件给父组件传值1.子组件要用 $emit 的方法表达对其赋新值的意图this.$emit('update:title', newTitle)  2.父组件需要监听那个 自定义事件 并根据需要更新本地数据&lt;text-document  :title="title"   //这是父组件给子组件传值(自定义属性)  @update:title="title = $event"&gt; //监听自定义事件&lt;/text-document&gt;</code></pre><p>对此Vue提供了.sync的语法糖进行简写达到子组件给父组件传值的效果</p><pre><code>1.子组件要用 $emit 的方法表达对其赋新值的意图this.$emit('update:title', newTitle) 2.父组件可以使用.sync写法&lt;text-document :title.sync="title"&gt;&lt;/text-document&gt;</code></pre><p><strong>注意:</strong></p><p>1.带有<code>.sync</code> 修饰符的 <code>v-bind</code> <strong>不能</strong>和表达式一起使用 </p><p>(例如 <code>v-bind:title.sync=”doc.title + ‘!’”</code> 是无效的) </p><ol start="2"><li>如果一个组件的多个数据都要实现双向绑定，根据上面学到的知识，需要给每个数据加sync修饰符 </li></ol><pre><code>&lt;info :a.sync="value1" :b.sync="value2" :c.sync="value3" :d.sync="value4"&gt;&lt;/info&gt;</code></pre><p><code>vue提供了一种更简便的方法， v-bind.sync = "对象"</code></p><pre><code>&lt;info v-bind.sync="obj"&gt;&lt;/info&gt;...&lt;script&gt;..data() {    obj: {a: '', b: '', c: '', d: ''}}..&lt;/script&gt;</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> Vue修饰符 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Vue </tag>
+            
+            <tag> v-model </tag>
+            
+            <tag> Vue组件传值 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>vue双向数据绑定底层原理</title>
+      <link href="2019/09/08/v-model-yuan-li/"/>
+      <url>2019/09/08/v-model-yuan-li/</url>
+      
+        <content type="html"><![CDATA[<h2 id="vue-双向数据绑定底层原理"><a href="#vue-双向数据绑定底层原理" class="headerlink" title="vue 双向数据绑定底层原理"></a>vue 双向数据绑定底层原理</h2><h3 id="js底层原理"><a href="#js底层原理" class="headerlink" title="js底层原理:"></a>js底层原理:</h3><p><strong>原理:</strong> <code>vue双向数据绑定的底层原理核心是通过Object.defineProprety()方法,实现数据劫持,结合发布订阅者模式的方式实现的.</code></p><p>1.<strong>Object.defineProprety()方法:</strong></p><pre><code> var obj={} var val='haha' //参1:给哪个对象设置属性 //参2:属性名称是什么 //参3:对象:封装get和set方法 //一旦调用属性,就会走到get方法中 //一旦修改属性,就会走到set方法中    Object.defineProperty(obj,'val',{        get:function(){        return val     //return 返回值决定了以后调用属性返回的值      },      set:function(newval){     //newval代表修改后的内容        val = newval       //把修改的值赋给对象的那个属性          // 监听到数据有变化 更新一下DOM        document.getElementById('input11').value=val        document.getElementById('span11').innerHTML=val      }    })//input事件 只要文本框内容发生了变化,修改了属性 就会执行set方法更新dom//达到数据发生变化 视图也跟着变化,视图变化,数据也随之变化的效果    document.addEventListener('keyup',function(e){      obj.val=e.target.value    })// 点击按钮事件      var num = 0;    let btn=document.getElementsByTagName('button')[0]    btn.addEventListener('click',function(){      obj.val=num++    })</code></pre><p>2.<strong>数据劫持</strong></p><p>通过上面对Object.defineProperty的了解，可以发现，<code>当我们访问或设置对象的属性的时候，都会触发相对应的函数</code>，然后在这个函数里``返回或设置属性的值`。</p><p>那么，我们就可以在<code>触发函数的时候</code>做点我们自己想做的事情(比如更新dom)，这也就是<code>劫持操作</code>。</p><p>在Vue中其实就是通过<strong>Object.defineProperty来劫持对象属性的setter和getter操作</strong>，并<strong>“种下”一个监听器</strong>，当数据发生变化的时候发出通知。</p><p>3.<strong>发布订阅者模式</strong></p><p><code>发布者只有一个 订阅者可以有多个,新的订阅者随时进入,旧的订阅者随时退出</code></p><h3 id="v-bind和input事件模拟双向数据绑定"><a href="#v-bind和input事件模拟双向数据绑定" class="headerlink" title="v-bind和input事件模拟双向数据绑定"></a>v-bind和input事件模拟双向数据绑定</h3><p>在vue中可以利用<code>v-bind:value</code>和<code>监听input</code>事件来实现数据驱动视图.视图改变数据也改变的双向数据绑定</p><pre><code>&lt;body&gt;    &lt;div id="app"&gt;      &lt;input type="text" v-bind:value="msg" @input="changeview" /&gt;      &lt;div&gt;{{msg}}&lt;/div&gt;      &lt;button @click="btn"&gt;改变数据&lt;/button&gt;    &lt;/div&gt;    &lt;script&gt;      const vm = new Vue({        el: "#app",        data: {          msg: "hello",        },        methods: {          btn() {            this.msg = "wwwwwwww";       // 当点击按钮改变数据的时候 视图也改变了          },          changeview(e) {    // 监听input事件 当视图改变时 也能实现数据改变            this.msg = e.target.value;           },        },      })    &lt;/script&gt;</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> Vue底层原理 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Vue </tag>
+            
+            <tag> v-model </tag>
+            
+            <tag> Vue底层原理 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>怎么让一个不定宽高的div,垂直水平居中?</title>
       <link href="2019/09/07/html/"/>
       <url>2019/09/07/html/</url>
       
-        <content type="html"><![CDATA[<h2 id="怎么让一个不定宽高的div-垂直水平居中"><a href="#怎么让一个不定宽高的div-垂直水平居中" class="headerlink" title="怎么让一个不定宽高的div,垂直水平居中?"></a>怎么让一个不定宽高的div,垂直水平居中?</h2><p><code>方法一:</code></p><pre><code>div子盒子在父盒子中垂直居中的方法一: 利用定位    先设置子绝父相    再给子盒子设置:          top:50%           left:50%          margin-top:负的子盒子高的一半          margin-left:负的子盒子宽的一半</code></pre><p><code>方法二:</code></p><pre><code>div盒子垂直居中方法2: flex方法:    给父盒子设置:       display:flex,        justify-content:center,(x轴居中),       align-items:center(y轴居中)</code></pre><p><code>方法三:</code></p><pre><code>div盒子垂直居中方法3: 定位+位移   先设置定位:子绝父相     给子盒子设置:         top:50%,         left:50%,         tansform:translate(-50%,-50%)</code></pre><p><code>方法四:</code></p><pre><code>div盒子垂直居中方法4: 利用margin:auto    先设置定位:子绝父相     再给子盒子设置:            margin: auto;            top: 0;            left: 0;            right: 0;            bottom: 0;</code></pre>]]></content>
+        <content type="html"><![CDATA[<h2 id="怎么让一个不定宽高的div-垂直水平居中"><a href="#怎么让一个不定宽高的div-垂直水平居中" class="headerlink" title="怎么让一个不定宽高的div,垂直水平居中?"></a>怎么让一个不定宽高的div,垂直水平居中?</h2><h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一:"></a><code>方法一:</code></h3><pre><code>div子盒子在父盒子中垂直居中的方法一: 利用定位    先设置子绝父相    再给子盒子设置:          top:50%           left:50%          margin-top:负的子盒子高的一半          margin-left:负的子盒子宽的一半</code></pre><h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二:"></a><code>方法二:</code></h3><pre><code>div盒子垂直居中方法2: flex方法:    给父盒子设置:       display:flex,        justify-content:center,(x轴居中),       align-items:center(y轴居中)</code></pre><h3 id="方法三"><a href="#方法三" class="headerlink" title="方法三:"></a><code>方法三:</code></h3><pre><code>div盒子垂直居中方法3: 定位+位移   先设置定位:子绝父相     给子盒子设置:         top:50%,         left:50%,         tansform:translate(-50%,-50%)</code></pre><h3 id="方法四"><a href="#方法四" class="headerlink" title="方法四:"></a><code>方法四:</code></h3><pre><code>div盒子垂直居中方法4: 利用margin:auto    先设置定位:子绝父相     再给子盒子设置:            margin: auto;            top: 0;            left: 0;            right: 0;            bottom: 0;</code></pre>]]></content>
       
       
       <categories>
@@ -23,6 +137,120 @@
             <tag> HTML </tag>
             
             <tag> CSS </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数组去重的多种方法</title>
+      <link href="2019/09/07/qu-chong/"/>
+      <url>2019/09/07/qu-chong/</url>
+      
+        <content type="html"><![CDATA[<h2 id="数组去重的多种方法"><a href="#数组去重的多种方法" class="headerlink" title="数组去重的多种方法"></a>数组去重的多种方法</h2><p><strong>1.ES6新语法 Set</strong></p><pre><code>let arr=[1,13,22,3,1,4,5,13,6,2,3,8,6,22]     let myset=new Set(arr)     console.log(myset); </code></pre><p> <strong>2.遍历旧数组,利用indexOf,值不在新数组就push进新数组中</strong></p><pre><code>function unique(arr) {            let newarr = []       for (let i = 0; i &lt; arr.length; i++) {          if (newarr.indexOf(arr[i]) === -1) {                    newarr.push(arr[i])                }            }            return newarr       //新数组去重完成的结果        }         console.log(unique(arr));</code></pre><p> <strong>3.遍历旧数组,利用includes,值不在新数组就push进新数组中</strong></p><pre><code>function unique(arr) {            let newarr = []   for (let i = 0; i &lt; arr.length; i++) {     if (!newarr.includes(arr[i])) {    //false就不存在                  newarr.push(arr[i])                }            }            return newarr    //新数组去重完成的结果        }        console.log(unique(arr));</code></pre><p> <strong>4.先sort排序,再遍历旧数组,如果数组的第i项不等于i=1项就push进新数组</strong></p><pre><code>function unique(arr) {            arr=arr.sort()            console.log(arr);            let newarr = [arr[0]]            //新数组里有旧数组第一项            for (let i = 1; i &lt; arr.length; i++) {                //遍历从index=1开始 因为0不能减一                if (arr[i] !== arr[i - 1]) {                    newarr.push(arr[i])                }            }            return newarr        }        console.log(unique(arr));</code></pre><p> <strong>5.利用filter方法 返回数组中indexOf该项等于自身index的的值</strong></p><p>原理:indexOf只能查找到第一个满足条件的值</p><pre><code>      let arr2= arr.filter(           function(item, index, array){                //array就是filter的数组              return array.indexOf(item) === index            })        console.log(arr2);</code></pre><p> <strong>6.双层for循环 然后spllice去重</strong></p><pre><code>function newArr(arr) {        for (var i = 0; i &lt; arr.length; i++) {            for (var j = i + 1; j &lt; arr.length; j++) {                if (arr[i] === arr[j]) {                    arr.splice(j, 1)                }            }        }        return arr    }        console.log(newArr(arr));</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> js </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> 数组 </tag>
+            
+            <tag> 数组去重 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>如何进行数据类型的转换?</title>
+      <link href="2019/09/07/shu-ju-lei-xing-zhuan-huan/"/>
+      <url>2019/09/07/shu-ju-lei-xing-zhuan-huan/</url>
+      
+        <content type="html"><![CDATA[<h1 id="如何进行数据类型的转换"><a href="#如何进行数据类型的转换" class="headerlink" title="如何进行数据类型的转换"></a>如何进行数据类型的转换</h1><h2 id="1-转换为字符串类型"><a href="#1-转换为字符串类型" class="headerlink" title="1.转换为字符串类型:"></a><strong><code>1.转换为字符串类型:</code></strong></h2><ol><li>变量.toString()</li><li>String(变量)</li></ol><h2 id="2-转换为数字型"><a href="#2-转换为数字型" class="headerlink" title="2.转换为数字型:"></a><strong><code>2.转换为数字型:</code></strong></h2><p>使用表单或者promt获取到的数据都是字符串类型 不能进行加减运算  需要进行数据类型的转换</p><ol><li>parseInt(变量)  去单位 取整转换</li><li>parseFloat(变量)  去单位 保留小数转换</li><li>Number(变量)  </li></ol><h2 id="3-转换为布尔类型"><a href="#3-转换为布尔类型" class="headerlink" title="3.转换为布尔类型: "></a><strong><code>3.转换为布尔类型: </code></strong></h2><p><strong><code>方法Boolean()</code></strong></p><ol><li>代表空/否定的值会被转换为false 如:0 NaN null undefined</li><li>其余值都会转换为true </li></ol><h2 id="隐式转换进行数据类型的转换"><a href="#隐式转换进行数据类型的转换" class="headerlink" title="隐式转换进行数据类型的转换:"></a><strong>隐式转换进行数据类型的转换:</strong></h2><pre><code>  * 其他类型转string :  + 连接符  * 其他类型转number :         自增自减(++ --)       算术运算符( + - * / %)       关系运算符 :  &gt; &gt;= &lt; &lt;= == != === !==  * 其他类型转boolean :  ! 逻辑非</code></pre><h2 id="比较运算符-全等运算符和隐式转换"><a href="#比较运算符-全等运算符和隐式转换" class="headerlink" title="比较运算符 全等运算符和隐式转换:"></a><strong>比较运算符 全等运算符和隐式转换:</strong></h2><p> <code>=== </code>： 全等运算符。 比较时<code>不存在类型转换， 先比较类型，然后比较值</code></p><p><code>==</code>: 比较运算符。 比较时会进行隐式转换 , <code>隐式转换规则是转成number</code>，但有特殊情况如下:</p><pre><code> 比较运算符: x==y1. x 和 y  都为null 或 undefined---&gt;不会进行类型转换 得到结果 trueconsole.log( Number(null) );   //0console.log( Number(undefined) );   //NaNconsole.log( null == undefined );   //true2.x或y 为NaN  NaN与任何数据都不相等  不会类型转换，固定返回false console.log( NaN == 0 );  //false  console.log( NaN == undefined );  //false    console.log( NaN == null );   //false     console.log( NaN == NaN );   //false3. 当x或y都为：string，number，boolean 且数据类型不一致，此时会转换成number后运算console.log( 1 == '1' );  //true   1 == Number('1')console.log( false == '0' );  //true   Number(false) == Number('0')  0 == 04.x或y  都为引用类型。则直接比较两者地址，地址一致则为true，地址不一致则为false var arr1 = [10,20,30]; var arr2 = arr1;  //拷贝地址 赋值 var arr3 = [10,20,30];        console.log(arr1 == arr2);  //true  地址一样        console.log(arr1 == arr3);  //false 地址不一样        console.log(arr2 == arr3);  //false 地址不一样5.x或y 存在引用类型，则会转成 `原始值` 后比较//一个是引用类型，一个是基本类型//引用类型转原始值：先调用对象的valueOf方法获取原始值 再调用toString()转成字符串比较valueOf()   可以忽略， 对象类型(数组,对象)默认valueOf会返回自身toString()----&gt;  数组的toString() 本质是调用join()转成字符串toString()-----&gt; 对象的返回固定格式字符串  '[object Object]'console.log( [10,20,30] == '10,20,30' );  //--&gt;true//会先[10,20,30].valueOf()==[10,20,30]  再[10,20,30].join()=='10,20,30' console.log( [] == '' );  //true console.log( [] == 0 );   //true  (1) [].toString  (2) '' == 0  (3) 0 == 0 console.log( [] == '[object Object]' );  //false  数组是join转字符串console.log( {name:'张三'} == '[object Object]');  //true //对象的返回固定格式字符串  '[object Object]'console.log( {} == '[object Object]' );  //trueconsole.log( {} == '' );  //falseconsole.log( ![] == 0 );//true //![] 隐式规则转布尔类型  !Boolean([]) =  !true = false 再转换成number比较0==0</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> js </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> 数据类型 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>深拷贝浅拷贝</title>
+      <link href="2019/09/07/shen-kao-bei/"/>
+      <url>2019/09/07/shen-kao-bei/</url>
+      
+        <content type="html"><![CDATA[<h2 id="深拷贝浅拷贝"><a href="#深拷贝浅拷贝" class="headerlink" title="深拷贝浅拷贝"></a>深拷贝浅拷贝</h2><h3 id="区分赋值-浅拷贝和深拷贝"><a href="#区分赋值-浅拷贝和深拷贝" class="headerlink" title="区分赋值,浅拷贝和深拷贝:"></a><strong><code>区分赋值,浅拷贝和深拷贝</code>:</strong></h3><pre><code>* 赋值var obj1={ name:'张三', age:10, score:{Math:0,English:0} }var obj2=obj1  -----&gt;这里不是拷贝 是赋值                     只是引用指向发生变化(指向同一个内存地址)                     内存中仍然只有一个对象obj2.name = "李四"; //因为指向的内存地址一样  所以 obj1 中的值也会改变                 </code></pre><pre><code>* 浅拷贝------------------------------------------------------------浅拷贝:会把对象的第一层属性进行拷贝  (拷贝之后改动不会影响原对象)      如果对象中还有嵌套关系(复杂数据类型如数组,对象),那么只拷贝引用 (改动仍会影响原对象)var obj1={ name:'张三', age:10, score:{Math:0,English:0 } }//浅拷贝的方法  Object.assign(拷贝到哪, 拷贝哪个)var obj2 = Object.assign({}, obj1); obj2.name = "小明";     // obj1中的 name 不会变obj2.score.Math = 90;  //  obj1中的 score.Math 会改变，因为只拷贝了第一层属性* 解构赋值也是浅拷贝      var obj1 = { name: "圆", radius: 10, point: { x: 0, y: 0 } };      var obj2 = { ...obj1 };     // 解构赋值      obj2.name = "圆3";           // obj1.name不会变      obj2.point.x = 3;            //obj1.point.x 改变</code></pre><pre><code>* 深拷贝 ---&gt; 会拷贝完整的嵌套结构  拷贝后的对象指向的是完全不同的内存地址 改动不会影响原对象</code></pre><h3 id="深拷贝的方法"><a href="#深拷贝的方法" class="headerlink" title="深拷贝的方法:"></a><strong><code>深拷贝的方法:</code></strong></h3><p><strong>1.JSON方法</strong></p><blockquote><p>先JSON.stringify( )将对象转化为字符串  (序列化)</p><p>再JSON.parse( )将字符串转为对象  (反序列化)</p><p>但是:JSON.stringify( )在转化Date,RegExp对象,undefind及function时会一些出现问题</p></blockquote><p><strong>2.lodash库</strong></p><p> <code>_.cloneDeep(value)</code>      value是要拷贝的对象</p><p><strong>3.jquery</strong></p><p> <code>$.extend(true,{},a,b)</code><br>         true：是否进行深拷贝,不加默认为false浅拷贝<br>         { }：将合并结果保存到新对象，这样原对象将不会发生改变<br>         a：第一个合并的对象<br>         b：第二个合并的对象 </p><p><strong>4.用递归的方法</strong></p><pre><code>var obj = {        name: "娃哈哈",        age: 22,        color: ["red", "blue", "green"],        message: {          sex: "男",          score: 99,        },      };-----------------------------------------------------------------------      var newObj = {};      function kaobei(newObj, obj) {        for (var key in obj) {            //遍历需要拷贝的对象/数组          // 检测obj中的属性是否为数组或者对象，要先判断数组，因为万物皆对象          if (obj[key] instanceof Array) {            // 把newObj[key]赋值成数组，确保接收            newObj[key] = [];            kaobei(newObj[key], obj[key]);         // 递归          } else if (obj[key] instanceof Object) {            newObj[key] = {};            kaobei(newObj[key], obj[key]);        //递归          } else {            newObj[key] = obj[key];          }        }      }   kaobei(newObj, obj);</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> js </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> 深拷贝 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>闭包,内存泄漏,垃圾回收机制</title>
+      <link href="2019/09/07/bi-bao/"/>
+      <url>2019/09/07/bi-bao/</url>
+      
+        <content type="html"><![CDATA[<h2 id="闭包-内存泄漏-垃圾回收机制"><a href="#闭包-内存泄漏-垃圾回收机制" class="headerlink" title="闭包,内存泄漏,垃圾回收机制"></a>闭包,内存泄漏,垃圾回收机制</h2><p>​                                                                  学习阮一峰的闭包的一些总结</p><h3 id="1-什么是内存泄漏"><a href="#1-什么是内存泄漏" class="headerlink" title="1.什么是内存泄漏"></a><strong>1.什么是内存泄漏</strong></h3><p>   程序的运行需要内存 ,只要程序提出要求,操作系统或者运行时就必须供给内存.</p><pre><code>对于持续运行的服务进程,必须及时释放不再用到的内存,否则,内存占用越来越高,轻则影响系统性能,重则导致进程崩溃.</code></pre><p>   <code>不再用到的内存,没有及时释放,就叫做内存泄漏.</code></p><h3 id="2-垃圾回收机制"><a href="#2-垃圾回收机制" class="headerlink" title="2.垃圾回收机制"></a><strong>2.垃圾回收机制</strong></h3><p> 大多数语言提供了<code>自动内存管理</code>,自动释放内存,这被称为垃圾回收机制</p><p> 垃圾回收机制怎么知道哪些内存不需要了呢</p><p>最常用的方法是<code>"引用计数"</code>,语言引擎保存了内存的所有资源的引用次数,如果一个值的引用次数是0,就说明这个值不再用到了 ,就可以将这块内存释放</p><p>另一个方法是:标记清除法,与引用计数法类似</p><p>==是否有了垃圾回收机制程序员就可以忽略内存泄漏问题?==</p><p><strong>不可以</strong>    </p><p>小例子如下:</p><pre><code>const arr = [1, 2, 3, 4];console.log('hello world');//arr这个数组引用次数为1  即使在后面没有引用,还是会持续占用内存</code></pre><pre><code>let arr = [1, 2, 3, 4];console.log('hello world');arr = null;//arr被重置为null,//解除了arr的引用,引用次数变成了0,这块内存就可以释放了</code></pre><p><strong>因此,有了垃圾回收机制,还是要关注内存占用,那些很占空间的值,一旦不在用到,不再引用时,就需要手动解除引用.</strong></p><p>补充:ES6提供了两种的新的数据结构, <a href="http://es6.ruanyifeng.com/#docs/set-map#WeakSet">WeakSet</a> 和 <a href="http://es6.ruanyifeng.com/#docs/set-map#WeakMap">WeakMap</a> ,对新建值的引用不计入垃圾回收机制,是弱引用,一旦后面消除对这个值的引用,它占用的内存就会被垃圾回收机制释放</p><p> <a href="http://www.ruanyifeng.com/blog/2017/04/memory-leak.html">http://www.ruanyifeng.com/blog/2017/04/memory-leak.html</a> </p><h3 id="3-什么是闭包"><a href="#3-什么是闭包" class="headerlink" title="3.什么是闭包"></a><strong>3.什么是闭包</strong></h3><p><strong>闭包的产生原因:</strong></p><blockquote><p>1.在函数内部可以可以直接读取全局变量</p><p><strong>2.内层函数可以直接读取外层函数的变量</strong></p><p>3.在函数外部 无法读取函数内的局部变量  !!!</p></blockquote><p><code>要解决从外部读取局部变量的问题:</code></p><p>   1.函数不能直接把变量return出来,return出来的变量变成了全局变量,容易被随意调用,修改</p><ol start="2"><li>通过变通方法  就是在函数的内部，再定义一个函数  然后内层函数就可以直接读取外层函数的变量 (闭包)</li></ol><p><strong>闭包概念:</strong></p><p>我的理解是:<code>闭包就是能够读取其他函数内部变量的函数</code></p><p>在js中 只有函数内部的子函数才能读取局部变量,因此可以把闭包简单理解成 “<code>定义在一个函数内部的函数</code>“</p><p>在本质上, 闭包就是将函数内部和函数外部连接起来的一座桥梁。 </p><pre><code>　　function f1(){　　　　var n=999;　　　　function f2(){　　　　　　alert(n);　　　　}　　　　return f2;    //f2就是闭包　　}　　var result=f1();　　result(); // 999</code></pre><p><strong>闭包的用途:</strong></p><p>1.读取函数内部的变量</p><p><code>2.延伸了变量的作用范围</code></p><p><strong>闭包的弊端:</strong></p><p>让这些变量的值始终保持在内存中, 内存消耗很大，所以不能滥用闭包，否则会造成网页的性能问题，在IE中可能导致<code>内存泄露</code>。解决方法是，在退出函数之前，将不使用的局部变量全部删除。</p><p><strong>实际项目中的闭包</strong>:</p><p>循环中，给DOM元素绑定事件，我们用到了闭包</p><p>循环中，设置了定时器，我们用到了闭包</p><p>eg:拓展练习</p><pre><code>var name = "The Window";　　var object = {　　　　name : "My Object",　　　　getNameFunc : function(){　　　　　　return function(){　　　　　　　　return this.name;　　　　　　};　　　　}　　};　　alert(object.getNameFunc()());</code></pre><pre><code>var name = "The Window";　　var object = {　　　　name : "My Object",　　　　getNameFunc : function(){　　　　　　var that = this;　　　　　　return function(){　　　　　　　　return that.name;　　　　　　};　　　　}　　};　　alert(object.getName        Func()());</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> js </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> 闭包 </tag>
+            
+            <tag> 垃圾回收机制 </tag>
+            
+            <tag> 内存泄漏 </tag>
             
         </tags>
       
